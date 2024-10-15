@@ -1,14 +1,9 @@
 name: Weekly funding opportunity scraper and Email Sender
 
-# on:
-#   schedule:
-#     # Runs at 9:00 AM ET (14:00 UTC) every Monday
-#     - cron: '0 14 * * 1'
 on:
   schedule:
     # Runs at 2:13 PM ET (19:13 UTC) every Tuesday
     - cron: '13 19 * * 2'
-
   workflow_dispatch: # Allows manual triggering
 
 jobs:
@@ -21,39 +16,47 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Cache dependencies (this will create or clear the cache based on the cache key)
+      # clear any previous cache and ensure that dependencies are freshly installed without using any cached versions that might be causing issues.
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v3  # Ensure we are using v3 of cache action
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
 
-      # Step 2: Set up Python 3.11
+      # Step 3: Set up Python 3.11
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4  # Correct version for Python setup
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      # Step 3: Install Poetry
+      # Step 4: Install Poetry
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
           pip install poetry
 
-      # Step 4: Install dependencies using Poetry
+      # Step 5: Install dependencies using Poetry
       - name: Install dependencies
         run: |
           poetry install
 
-      # Step 5: Install Chrome for the GitHub Actions (Ubuntu)
+      # Step 6: Install Chrome for the GitHub Actions (Ubuntu)
       - name: Install Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-
-      # The webdriver-manager will handle downloading and setting up the correct ChromeDriver version when you run your scraper.
-
-      # Step 6: Run the scraper Python script using Poetry
+      # Step 7: Run the scraper Python script using Poetry
       - name: Run the scraper script
         run: |
           poetry run python funding_opportunity/scraper.py
 
-      # Step 8: Create client_secret.json automaticlly from GitHub Secret
+      # Step 8: Create client_secret.json automatically from GitHub Secret
       - name: Create client_secret.json
         run: |
           echo "$CLIENT_SECRET_JSON" > funding_opportunity/client_secret.json
