@@ -50,9 +50,12 @@ jobs:
         run: |
           sudo apt-get install -yqq unzip curl
           CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          echo "Installing ChromeDriver version: $CHROME_DRIVER_VERSION"
           wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
           sudo unzip /tmp/chromedriver.zip -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
+          /usr/local/bin/chromedriver --version  # Print ChromeDriver version
+
 
       # Step 7: Run the scraper Python script using Poetry
       - name: Run the scraper script
