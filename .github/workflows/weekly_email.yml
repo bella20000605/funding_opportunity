@@ -8,15 +8,12 @@ on:
   schedule:
     # Runs at 2:13 PM ET (19:13 UTC) every Tuesday
     - cron: '13 19 * * 2'
-    
+
   workflow_dispatch: # Allows manual triggering
-    inputs:
-      reason:
-        description: 'Reason for manually running the workflow'
-        required: false
 
 jobs:
-  send-email:
+
+  run-scraper-and-send-email:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,24 +33,38 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
 
-      # Step 4: Install Dependencies using Poetry
+      # Step 4: Install dependencies using Poetry
       - name: Install dependencies
         run: |
           poetry install
 
-      # Step 5: Run the scraper Python script using Poetry (before email sending)
+      # Step 5: Install Chrome for the GitHub Actions (Ubuntu)
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      # Step 6: Install ChromeDriver for Ubuntu
+      - name: Install ChromeDriver
+        run: |
+          sudo apt-get install -yqq unzip
+          wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
+          sudo unzip /tmp/chromedriver.zip -d /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+
+      # Step 7: Run the scraper Python script using Poetry
       - name: Run the scraper script
         run: |
           poetry run python funding_opportunity/scraper.py
 
-      # Step 6: Create client_secret.json dynamically from GitHub Secret
+      # Step 8: Create client_secret.json automatically from GitHub Secret
       - name: Create client_secret.json
         run: |
           echo "$CLIENT_SECRET_JSON" > funding_opportunity/client_secret.json
         env:
           CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
 
-      # Step 7: Run the email-sending Python script using Poetry
+      # Step 9: Run the email-sending Python script using Poetry
       - name: Run weekly email script
         run: |
           poetry run python funding_opportunity/send_email.py
