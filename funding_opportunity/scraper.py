@@ -1,11 +1,13 @@
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
+
 
 # Set the download directory (your local path)
 download_dir = os.path.join(os.getcwd(), 'downloads')  # This will save it in a "downloads" folder within your project
@@ -45,8 +47,12 @@ search_box = driver.find_element(By.ID, 'inp-keywords')
 search_box.send_keys('cancer')  # Replace with your search keyword
 search_box.send_keys(Keys.RETURN)
 
-# Step 6: Wait for the search results to load
-time.sleep(5)
+# Step 6: Wait for the search results to load using explicit waits (ensuring that the page has fully loaded before interacting with elements)
+try:
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.LINK_TEXT, 'Export Results')))
+except Exception as e:
+    print(f"Error while waiting for the search results to load: {e}")
+    driver.quit()
 
 # Step 7: Find and click the 'Export Results' link to download the CSV
 try:
