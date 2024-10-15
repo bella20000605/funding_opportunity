@@ -44,11 +44,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      # Step 6: Install ChromeDriver for Ubuntu
+          
+      # Step 6: Install ChromeDriver for Linux
       - name: Install ChromeDriver
         run: |
-          sudo apt-get install -yqq unzip
-          wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
+          sudo apt-get install -yqq unzip curl
+          CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
           sudo unzip /tmp/chromedriver.zip -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
 
@@ -57,7 +59,7 @@ jobs:
         run: |
           poetry run python funding_opportunity/scraper.py
 
-      # Step 8: Create client_secret.json automatically from GitHub Secret
+      # Step 8: Create client_secret.json automaticlly from GitHub Secret
       - name: Create client_secret.json
         run: |
           echo "$CLIENT_SECRET_JSON" > funding_opportunity/client_secret.json
