@@ -21,10 +21,18 @@ prefs = {
     "download.directory_upgrade": True,
     "safebrowsing.enabled": True  # Ensure safe browsing is enabled
 }
+
 chrome_options.add_experimental_option("prefs", prefs)
 
+
+# Enable headless mode when running in a server environment (GitHub Actions)
+chrome_options.add_argument('--headless')  # Comment out if you want to see the browser UI locally
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+
 # Set up the ChromeDriver Service
-service = Service(executable_path='./chromedriver/chromedriver')  # Path to your chromedriver
+service = Service(executable_path='/usr/local/bin/chromedriver')
+# service = Service(executable_path='./chromedriver/chromedriver')  # Path to your chromedriver
 
 # Step 2: Set up WebDriver with Service object
 driver = webdriver.Chrome(service=service, options=chrome_options)
