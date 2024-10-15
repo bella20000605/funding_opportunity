@@ -1,0 +1,19 @@
+
+poetry init
+poetry add python-dotenv
+touch .env
+
+poetry add selenium beautifulsoup4 requests
+
+mkdir -p funding_opportunity tests
+
+touch tests/test_scraper.py # create those files
+
+poetry run python funding_opportunity/scraper.py  # run the script(if have istalled the dependencies using poetry)
+
+poetry add google-auth google-auth-oauthlib google-api-python-client
+
+poerty run python send_email.py  # Run it after your scraper completes by executing: # how to run a pythin script
+
+
+mkdir -p .github/workflows

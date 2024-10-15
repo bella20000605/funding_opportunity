@@ -1,0 +1,59 @@
+name: Weekly funding opportunity scraper and Email Sender
+
+# on:
+#   schedule:
+#     # Runs at 9:00 AM ET (14:00 UTC) every Monday
+#     - cron: '0 14 * * 1'
+on:
+  schedule:
+    # Runs at 2:05 PM ET (19:05 UTC) every Tuesday
+    - cron: '5 19 * * 2'
+    
+  workflow_dispatch: # Allows manual triggering
+    inputs:
+      reason:
+        description: 'Reason for manually running the workflow'
+        required: false
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Python 3.11
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Step 3: Install Poetry
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      # Step 4: Install Dependencies using Poetry
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      # Step 5: Run the scraper Python script using Poetry (before email sending)
+      - name: Run the scraper script
+        run: |
+          poetry run python funding_opportunity/scraper.py
+
+      # Step 6: Create client_secret.json dynamically from GitHub Secret
+      - name: Create client_secret.json
+        run: |
+          echo "$CLIENT_SECRET_JSON" > funding_opportunity/client_secret.json
+        env:
+          CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
+
+      # Step 7: Run the email-sending Python script using Poetry
+      - name: Run weekly email script
+        run: |
+          poetry run python funding_opportunity/send_email.py
