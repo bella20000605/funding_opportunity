@@ -24,7 +24,7 @@ jobs:
 
       # Step 2: Set up Python 3.11
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v4  # Correct version for Python setup
         with:
           python-version: '3.11'
 
@@ -48,7 +48,7 @@ jobs:
 
       # The webdriver-manager will handle downloading and setting up the correct ChromeDriver version when you run your scraper.
 
-      # Step 7: Run the scraper Python script using Poetry
+      # Step 6: Run the scraper Python script using Poetry
       - name: Run the scraper script
         run: |
           poetry run python funding_opportunity/scraper.py
