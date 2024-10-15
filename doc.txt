@@ -17,3 +17,6 @@ poerty run python send_email.py  # Run it after your scraper completes by execut
 
 
 mkdir -p .github/workflows
+
+
+poetry add webdriver-manager #automatically handle downloading the correct version of chromedriver.

@@ -3,6 +3,9 @@ from selenium.webdriver.chrome.service import Service  # New import
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
 
@@ -14,7 +17,9 @@ if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 
 # Step 1: Set Chrome options to configure the download location
-chrome_options = Options()
+chrome_options = webdriver.ChromeOptions()
+
+
 prefs = {
     "download.default_directory": download_dir,  # Set the directory where the file will be saved
     "download.prompt_for_download": False,  # Avoid the popup asking where to save the file
@@ -34,8 +39,8 @@ chrome_options.add_argument('--disable-dev-shm-usage')
 service = Service(executable_path='/usr/local/bin/chromedriver')
 # service = Service(executable_path='./chromedriver/chromedriver')  # Path to your chromedriver
 
-# Step 2: Set up WebDriver with Service object
-driver = webdriver.Chrome(service=service, options=chrome_options)
+# Step 2: Rather than manually managing the chromedriver, use the webdriver-manager package to automatically handle downloading the correct version of chromedriver
+driver = webdriver.Chrome(service=service(ChromeDriverManager().install()), options=chrome_options)
 
 # Step 3: Open Grants.gov search page
 driver.get('https://www.grants.gov/search-grants.html')
