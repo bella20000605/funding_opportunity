@@ -13,41 +13,40 @@ from email import encoders
 # If modifying these SCOPES, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-# Step 1: Authenticate using OAuth2
 def authenticate_gmail():
     creds = None
-    # The file token.json stores the user's access and refresh tokens
-    # and is created automatically when the authorization flow completes for the first time.
+    # Check if token.json exists for previously authenticated credentials
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
+            # Use InstalledAppFlow for OAuth login
             flow = InstalledAppFlow.from_client_secrets_file(
-                './client_secret.json', SCOPES)  # Adjust the path if needed
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
+                os.path.join(os.getcwd(), 'client_secret.json'), SCOPES)
+            creds = flow.run_local_server(port=0)  # Use run_console() for non-local environments
+        # Save the credentials to token.json for future use
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
     return creds
 
-# Step 2: Send an email using the Gmail API with multiple attachments
 def send_email(service, sender, recipient, subject, body, attachment_dir):
-    # Create the email
+    # Create the email structure
     message = MIMEMultipart()
     message['to'] = recipient
     message['from'] = sender
     message['subject'] = subject
-    msg = MIMEText(body)
-    message.attach(msg)
+    message.attach(MIMEText(body))
 
-    # Attach all files in the specified directory
+    # Attach files from the attachment directory
     if os.path.exists(attachment_dir):
-        for filename in os.listdir(attachment_dir):
+        files = os.listdir(attachment_dir)
+        if not files:
+            print(f"No attachments found in {attachment_dir}.")
+        for filename in files:
             file_path = os.path.join(attachment_dir, filename)
-            if os.path.isfile(file_path):  # Only attach files, ignore directories
+            if os.path.isfile(file_path):
                 with open(file_path, "rb") as attachment:
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload(attachment.read())
@@ -57,33 +56,26 @@ def send_email(service, sender, recipient, subject, body, attachment_dir):
     else:
         print(f"Attachment directory {attachment_dir} not found.")
 
-    # Encode the message in base64
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
     try:
-        # Send the email using the Gmail API
         sent_message = service.users().messages().send(userId="me", body={'raw': raw_message}).execute()
         print(f"Message sent successfully! Message Id: {sent_message['id']}")
     except HttpError as error:
         print(f"An error occurred: {error}")
 
-# Main script
 def main():
     creds = authenticate_gmail()
-
-    # Build the Gmail service
     service = build('gmail', 'v1', credentials=creds)
 
-    # Email content
-    sender = 'js5081@georgetown.edu'  # Replace with your email
-    recipient = 'jz922@georgetown.edu'  # Replace with recipient email
+    # Use environment variables for email addresses
+    sender = os.getenv('SENDER_EMAIL', 'js5081@georgetown.edu')  # Use env var or default for local testing
+    recipient = os.getenv('RECIPIENT_EMAIL', 'jz922@georgetown.edu')
+
     subject = 'Test Email with Multiple Attachments'
     body = 'This is a test email with all files in the downloads folder attached.'
+    attachment_dir = os.path.join(os.getcwd(), 'downloads')
 
-    # Path to the directory where your CSV files are located (downloads folder)
-    attachment_dir = os.path.join(os.getcwd(), './downloads') 
-
-    # Send the email with attachments
     send_email(service, sender, recipient, subject, body, attachment_dir)
 
 if __name__ == '__main__':
