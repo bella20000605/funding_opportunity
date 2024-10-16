@@ -7,18 +7,26 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+import json
 
 # SCOPES for Gmail API
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
+
 def authenticate_gmail():
-    # Load service account credentials from the GitHub secret
-    service_account_info = os.environ.get("SERVICE_ACCOUNT_KEY")
+    creds = None
     
-    # Parse the service account info
-    credentials = Credentials.from_service_account_info(eval(service_account_info), scopes=SCOPES)
+    # Service account credentials from GitHub Secrets
+    service_account_info = os.getenv('GMAIL_SERVICE_ACCOUNT')
     
-    return credentials
+    # Load the service account info from the JSON string
+    if service_account_info:
+        service_account_info = json.loads(service_account_info)  # Use json.loads to convert string to dict
+        creds = Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
+    else:
+        print("Service account credentials not found!")
+
+    return creds
 
 def send_email(service, sender, recipient, subject, body, attachment_dir):
     message = MIMEMultipart()
