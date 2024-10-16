@@ -15,6 +15,13 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 def authenticate_gmail():
     creds = None
+
+    # Debugging: Check if the client_secret.json file exists
+    if os.path.exists('funding_opportunity/client_secret.json'):
+        print("client_secret.json found!")
+    else:
+        print("client_secret.json NOT found!")
+    
     # Check if token.json exists for previously authenticated credentials
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
@@ -24,7 +31,7 @@ def authenticate_gmail():
         else:
             # Use InstalledAppFlow for OAuth login
             flow = InstalledAppFlow.from_client_secrets_file(
-                'funding_opportunity/client_secret.json', SCOPES) # This will ensure the script looks for the client_secret.json file inside the funding_opportunity/ folder where your workflow is saving it.
+                'funding_opportunity/client_secret.json', SCOPES)
             creds = flow.run_local_server(port=0)  # Use run_console() for non-local environments
         # Save the credentials to token.json for future use
         with open('token.json', 'w') as token:
