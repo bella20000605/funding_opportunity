@@ -34,26 +34,19 @@ jobs:
         run: |
           poetry install
 
-      # Step 5: Create client_secret.json from GitHub Secret
-      - name: Create client_secret.json
-        run: |
-          echo "$CLIENT_SECRET_JSON" > funding_opportunity/client_secret.json
-        env:
-          CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
-
-      # Step 6: Create token.json from GitHub Secret
+      # Step 5: Create token.json from GitHub Secret
       - name: Create token.json
         run: |
           echo "$GMAIL_TOKEN_JSON" > funding_opportunity/token.json
         env:
           GMAIL_TOKEN_JSON: ${{ secrets.GMAIL_TOKEN_JSON }}
 
-      # Step 7: Run the scraper Python script using Poetry
+      # Step 6: Run the scraper Python script using Poetry
       - name: Run the scraper script
         run: |
           poetry run python funding_opportunity/scraper.py
 
-      # Step 8: Run the email-sending Python script using Poetry
+      # Step 7: Run the email-sending Python script using Poetry
       - name: Run weekly email script
         run: |
           poetry run python funding_opportunity/send_email.py
