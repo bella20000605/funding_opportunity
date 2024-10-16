@@ -44,7 +44,7 @@ time.sleep(3)
 
 # Step 5: Find the keyword input field and enter the search term
 search_box = driver.find_element(By.ID, 'inp-keywords')
-search_box.send_keys('cancer')  # Replace with your search keyword
+search_box.send_keys('Global Health Security')  # Replace with search keyword
 search_box.send_keys(Keys.RETURN)
 
 # Step 6: Wait for the search results to load using explicit waits (ensuring that the page has fully loaded before interacting with elements)
