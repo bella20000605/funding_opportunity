@@ -13,6 +13,7 @@ from email import encoders
 # If modifying these SCOPES, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
+
 def authenticate_gmail():
     creds = None
 
@@ -21,7 +22,7 @@ def authenticate_gmail():
         print("client_secret.json found!")
     else:
         print("client_secret.json NOT found!")
-    
+
     # Check if token.json exists for previously authenticated credentials
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
@@ -32,11 +33,41 @@ def authenticate_gmail():
             # Use InstalledAppFlow for OAuth login
             flow = InstalledAppFlow.from_client_secrets_file(
                 'funding_opportunity/client_secret.json', SCOPES)
-            creds = flow.run_local_server(port=0)  # Use run_console() for non-local environments
-        # Save the credentials to token.json for future use
+            
+            # Use run_console() for non-interactive environments like GitHub Actions
+            creds = flow.run_console()  # This replaces run_local_server
+            
+        # Save the credentials for future use
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
+    
     return creds
+
+
+# def authenticate_gmail():
+#     creds = None
+
+#     # Debugging: Check if the client_secret.json file exists
+#     if os.path.exists('funding_opportunity/client_secret.json'):
+#         print("client_secret.json found!")
+#     else:
+#         print("client_secret.json NOT found!")
+    
+#     # Check if token.json exists for previously authenticated credentials
+#     if os.path.exists('token.json'):
+#         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+#     if not creds or not creds.valid:
+#         if creds and creds.expired and creds.refresh_token:
+#             creds.refresh(Request())
+#         else:
+#             # Use InstalledAppFlow for OAuth login
+#             flow = InstalledAppFlow.from_client_secrets_file(
+#                 'funding_opportunity/client_secret.json', SCOPES)
+#             creds = flow.run_local_server(port=0)  # Use run_console() for non-local environments
+#         # Save the credentials to token.json for future use
+#         with open('token.json', 'w') as token:
+#             token.write(creds.to_json())
+#     return creds
 
 def send_email(service, sender, recipient, subject, body, attachment_dir):
     # Create the email structure
