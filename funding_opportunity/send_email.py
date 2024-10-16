@@ -42,8 +42,33 @@ def authenticate_gmail():
     return creds
 
 
+def track_new_files(attachment_dir):
+    """Check for new files in the attachment directory and return only new files."""
+    manifest_file = 'sent_files.txt'  # A file to track sent files
+    
+    # Get a list of all CSV files in the attachment directory
+    all_files = [f for f in os.listdir(attachment_dir) if f.endswith('.csv')]
+    
+    # Read the list of files that have already been sent
+    if os.path.exists(manifest_file):
+        with open(manifest_file, 'r') as mf:
+            sent_files = set(mf.read().splitlines())
+    else:
+        sent_files = set()
 
-def send_email(service, sender, recipient, subject, body, attachment_dir):
+    # Find new files that haven't been sent yet
+    new_files = [f for f in all_files if f not in sent_files]
+
+    # Update the manifest file with newly sent files
+    if new_files:
+        with open(manifest_file, 'a') as mf:
+            for new_file in new_files:
+                mf.write(f"{new_file}\n")
+
+    return new_files
+
+
+def send_email(service, sender, recipient, subject, body, attachment_dir, new_files):
     # Create the email structure
     message = MIMEMultipart()
     message['to'] = recipient
@@ -51,12 +76,9 @@ def send_email(service, sender, recipient, subject, body, attachment_dir):
     message['subject'] = subject
     message.attach(MIMEText(body))
 
-    # Attach files from the attachment directory
-    if os.path.exists(attachment_dir):
-        files = os.listdir(attachment_dir)
-        if not files:
-            print(f"No attachments found in {attachment_dir}.")
-        for filename in files:
+    # Attach only new files
+    if new_files:
+        for filename in new_files:
             file_path = os.path.join(attachment_dir, filename)
             if os.path.isfile(file_path):
                 with open(file_path, "rb") as attachment:
@@ -66,7 +88,7 @@ def send_email(service, sender, recipient, subject, body, attachment_dir):
                     part.add_header('Content-Disposition', f"attachment; filename= {filename}")
                     message.attach(part)
     else:
-        print(f"Attachment directory {attachment_dir} not found.")
+        print("No new files to attach.")
 
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
@@ -76,6 +98,7 @@ def send_email(service, sender, recipient, subject, body, attachment_dir):
     except HttpError as error:
         print(f"An error occurred: {error}")
 
+
 def main():
     creds = authenticate_gmail()
     service = build('gmail', 'v1', credentials=creds)
@@ -84,11 +107,17 @@ def main():
     sender = os.getenv('SENDER_EMAIL', 'js5081@georgetown.edu')  # Use env var or default for local testing
     recipient = os.getenv('RECIPIENT_EMAIL', 'jz922@georgetown.edu')
 
-    subject = 'Test Email with Multiple Attachments'
-    body = 'This is a test email with all files in the downloads folder attached.'
+    subject = 'New CSV Files Available'
+    body = 'This is an automated email with newly scraped CSV files attached.'
     attachment_dir = os.path.join(os.getcwd(), 'downloads')
 
-    send_email(service, sender, recipient, subject, body, attachment_dir)
+    # Track new files
+    new_files = track_new_files(attachment_dir)
+
+    if new_files:
+        send_email(service, sender, recipient, subject, body, attachment_dir, new_files)
+    else:
+        print("No new files to send.")
 
 if __name__ == '__main__':
     main()
