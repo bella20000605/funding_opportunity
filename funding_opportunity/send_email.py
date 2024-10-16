@@ -14,37 +14,32 @@ from email import encoders
 # If modifying these SCOPES, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-
 def authenticate_gmail():
     creds = None
-
-    # Use token.json from local or from environment (GitHub Actions)
-    token_json = os.getenv('GMAIL_TOKEN_JSON')  # Retrieve token from GitHub Secrets in CI
-
-    if token_json:
-        # In GitHub Actions, load token.json from the environment variable
-        creds = Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
-        print("Using token.json from GitHub Secret.")
-    elif os.path.exists('token.json'):
-        # Local: use the token.json from local filesystem
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        print("Using local token.json.")
     
-    # If no valid credentials, use OAuth flow to generate new token.json locally
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'funding_opportunity/client_secret.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-            
-        # Save the credentials for future use
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+    # Check if token.json exists for previously authenticated credentials
+    if os.path.exists('funding_opportunity/token.json'):
+        creds = Credentials.from_authorized_user_file('funding_opportunity/token.json', SCOPES)
+        print("Using token.json for credentials.")
+    elif os.path.exists('funding_opportunity/client_secret.json'):
+        # If token.json is not found, use client_secret.json to generate new token
+        flow = InstalledAppFlow.from_client_secrets_file('funding_opportunity/client_secret.json', SCOPES)
+        creds = flow.run_local_server(port=0)
+        # Save the credentials to token.json for future use
+        with open('funding_opportunity/token.json', 'w') as token_file:
+            token_file.write(creds.to_json())
+        print("Generated new token.json and saved it.")
+    else:
+        print("Error: client_secret.json not found.")
     
+    # If credentials are expired, refresh them
+    if creds and creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+        with open('funding_opportunity/token.json', 'w') as token_file:
+            token_file.write(creds.to_json())
+        print("Token refreshed.")
+
     return creds
-
 
 
 
