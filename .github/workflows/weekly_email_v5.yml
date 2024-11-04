@@ -37,7 +37,7 @@ jobs:
       # Step 5: Run the scraper Python script using Poetry
       - name: Run the scraper script
         run: |
-          poetry run python funding_opportunity/scraper.py
+          poetry run python funding_opportunity/grants_gov_scraper.py
 
       # Step 6: Create token.json from GitHub Secret
       - name: Create token.json
