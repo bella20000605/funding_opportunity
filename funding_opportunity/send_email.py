@@ -116,6 +116,8 @@ def main():
 
     if new_files:
         send_email(service, sender, recipient, subject, body, attachment_dir, new_files)
+        # Clear sent_files.txt to treat files as new next time
+        open('sent_files.txt', 'w').close()
     else:
         print("No new files to send.")
 
