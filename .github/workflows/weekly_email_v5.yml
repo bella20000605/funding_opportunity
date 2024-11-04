@@ -3,8 +3,8 @@ name: Weekly funding opportunity scraper and Email Sender
 
 on:
   schedule:
-    # Runs at 2:13 PM ET (19:13 UTC) every Tuesday
-    - cron: '13 19 * * 2'
+    # Runs at 9:00 AM ET (14:00 UTC) every Monday
+    - cron: '0 14 * * 1'
 
   workflow_dispatch: # Allows manual triggering
 

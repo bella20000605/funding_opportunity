@@ -109,7 +109,7 @@ def main():
 
     subject = 'New CSV Files Available'
     body = 'This is an automated email with newly scraped CSV files attached.'
-    attachment_dir = os.path.join(os.getcwd(), 'downloads')
+    attachment_dir = os.path.join(os.getcwd(), 'downloads_website')
 
     # Track new files
     new_files = track_new_files(attachment_dir)

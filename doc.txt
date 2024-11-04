@@ -3,7 +3,7 @@ poetry init
 poetry add python-dotenv
 touch .env
 
-poetry add selenium beautifulsoup4 requests
+poetry add selenium beautifulsoup4 requests pandas
 
 mkdir -p funding_opportunity tests
 

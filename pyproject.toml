@@ -16,6 +16,7 @@ google-auth-oauthlib = "^1.2.1"
 google-api-python-client = "^2.149.0"
 webdriver-manager = "^4.0.2"
 google-auth-httplib2 = "^0.2.0"
+pandas = "^2.2.3"
 
 
 
